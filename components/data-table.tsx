@@ -14,9 +14,6 @@ import {
   GridRowModesModel,
   GridEventListener,
   GridCellParams,
-  GridValidRowModel,
-  GridRenderCellParams,
-  GridValueGetterParams,
 } from "@mui/x-data-grid";
 import {
   Box,
@@ -377,14 +374,12 @@ const ToolbarComponent = React.memo(
           return;
         }
 
-        // Convert to CSV manually
         const headers = visibleColumns.filter((col) => col !== "actions");
         const csvRows = [headers.join(",")];
 
         dataToExport.forEach((row: any) => {
           const values = headers.map((header) => {
             const value = row[header] || "";
-            // Escape values that contain commas, quotes, or newlines
             const stringValue = String(value);
             if (
               stringValue.includes(",") ||
@@ -436,8 +431,22 @@ const ToolbarComponent = React.memo(
     };
 
     return (
-      <Box sx={{ p: 1, display: "flex", justifyContent: "space-between" }}>
-        <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+      <Box
+        sx={{
+          p: 1,
+          display: "flex",
+          flexDirection: { xs: "column", md: "row" },
+          justifyContent: "space-between",
+          gap: 2,
+        }}
+      >
+        <Box
+          sx={{
+            display: "flex",
+            alignItems: "center",
+            width: { xs: "100%", md: "auto" },
+          }}
+        >
           <TextField
             variant="outlined"
             size="small"
@@ -461,10 +470,18 @@ const ToolbarComponent = React.memo(
                 </InputAdornment>
               ),
             }}
-            sx={{ width: "300px" }}
+            sx={{ width: { xs: "100%", md: "300px" } }}
           />
         </Box>
-        <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+        <Box
+          sx={{
+            display: "flex",
+            alignItems: "center",
+            flexWrap: "wrap",
+            gap: 1,
+            justifyContent: { xs: "flex-start", md: "flex-end" },
+          }}
+        >
           {hasEdits && (
             <>
               <Button
@@ -472,6 +489,7 @@ const ToolbarComponent = React.memo(
                 color="primary"
                 size="small"
                 onClick={() => setSaveConfirmOpen(true)}
+                sx={{ minWidth: { xs: "auto", sm: "100px" } }}
               >
                 Save All
               </Button>
@@ -485,6 +503,7 @@ const ToolbarComponent = React.memo(
                   "&:hover": {
                     backgroundColor: "#d32f2f",
                   },
+                  minWidth: { xs: "auto", sm: "100px" },
                 }}
               >
                 Cancel All
@@ -497,16 +516,32 @@ const ToolbarComponent = React.memo(
               color="error"
               size="small"
               onClick={() => setDeleteConfirmationOpen(true)}
-              startIcon={<Delete />}
+              startIcon={
+                <Delete sx={{ display: { xs: "none", sm: "block" } }} />
+              }
             >
-              Delete Selected
+              <Box
+                component="span"
+                sx={{ display: { xs: "none", sm: "inline" } }}
+              >
+                Delete Selected
+              </Box>
+              <Box
+                component="span"
+                sx={{ display: { xs: "inline", sm: "none" } }}
+              >
+                Delete
+              </Box>
             </Button>
           )}
           <Button
             variant="outlined"
             size="small"
             onClick={() => setIsImporting(true)}
-            startIcon={<FileUpload />}
+            startIcon={
+              <FileUpload sx={{ display: { xs: "none", sm: "block" } }} />
+            }
+            sx={{ minWidth: { xs: "auto", sm: "80px" } }}
           >
             Import
           </Button>
@@ -514,7 +549,10 @@ const ToolbarComponent = React.memo(
             variant="outlined"
             size="small"
             onClick={handleExport}
-            startIcon={<FileDownload />}
+            startIcon={
+              <FileDownload sx={{ display: { xs: "none", sm: "block" } }} />
+            }
+            sx={{ minWidth: { xs: "auto", sm: "80px" } }}
           >
             Export
           </Button>
@@ -524,11 +562,12 @@ const ToolbarComponent = React.memo(
           open={isImporting}
           onClose={() => setIsImporting(false)}
         />
+
         <Dialog
           open={isDeleteConfirmationOpen}
           onClose={() => setDeleteConfirmationOpen(false)}
         >
-          <DialogTitle>Are you absolutely sure?</DialogTitle>
+          <DialogTitle>Are you sure?</DialogTitle>
           <DialogContent>
             <DialogContentText>
               This action cannot be undone. This will permanently delete the{" "}
@@ -582,6 +621,7 @@ const ToolbarComponent = React.memo(
     );
   }
 );
+
 ToolbarComponent.displayName = "Toolbar";
 
 export function DataTable() {
